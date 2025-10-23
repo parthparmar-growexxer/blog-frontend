@@ -44,6 +44,11 @@ angular.module('blogApp')
             return user;
         },
 
+        getUserRole: function() {
+            const u = this.getUser();
+            return u ? u.role : null;
+        },
+
         getInitials: function() {
             const u = this.getUser();
             return u ? u.name.split(' ').map(n => n[0]).join('') : '';

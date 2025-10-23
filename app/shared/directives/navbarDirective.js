@@ -7,7 +7,8 @@ angular.module('blogApp')
             console.log('Navbar controller loaded');
             $scope.isLoggedIn = function () {return AuthService.isLoggedIn(); };
             $scope.getInitials = function () { return AuthService.getInitials(); };
-
+            $scope.userRole = function () { return AuthService.getUserRole(); };
+            
             $scope.login = function() {
                 const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
                 loginModal.show();

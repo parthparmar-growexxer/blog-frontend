@@ -65,6 +65,10 @@
                     .catch(err => console.error('Failed to load posts:', err));
             };
 
+            $scope.openBlog = function(postId) {
+                $location.path('/posts/' + postId);
+            };
+            
             $scope.deletePost = function(postId) {
                 if (confirm('Are you sure you want to delete this post?')) {
                     PostService.deletePost(postId)
@@ -129,6 +133,50 @@
             };
 
             // -------------------------
+            // Comments
+            // -------------------------
+            $scope.comments = [];
+            $scope.newComment = '';
+
+            // Load comments for a post
+            $scope.loadComments = function(postId) {
+                if (!postId) return;
+
+                PostService.getComments(postId)
+                    .then(res => $scope.comments = res.data.data)
+                    .catch(err => console.error('Failed to load comments:', err));
+            };
+
+            $scope.addComment = function(postId) {
+
+                $scope.newComment = document.getElementById('newComment').value;
+
+                if (!postId || !$scope.newComment.trim()) return;
+
+                PostService.addComment(postId, $scope.newComment)
+                    .then(res => {
+                        $scope.comments.push(res.data.data);
+                        $scope.post.comments = $scope.comments; // update post.comments for ng-repeat
+                        $scope.newComment = '';
+                    })
+                    .catch(err => console.error('Failed to add comment:', err));
+            };
+
+            // Delete a comment
+            $scope.deleteComment = function(commentId, index) {
+                if (!commentId) return;
+
+                PostService.deleteComment(commentId)
+                    .then(() => $scope.comments.splice(index, 1))
+                    .catch(err => console.error('Failed to delete comment:', err));
+            };
+
+            // Automatically load comments if viewing a post
+            if ($routeParams.id) {
+                $scope.loadComments($routeParams.id);
+            }
+
+            // -------------------------
             // Initialization
             // -------------------------
             if ($location.path() === '/posts/new') {
@@ -169,8 +217,35 @@
             }   
             else if ($routeParams.id) {
                 PostService.getPostById($routeParams.id)
-                    .then(res => $scope.post = res.data.data)
-                    .catch(err => console.error('Failed to load post:', err));
+                .then(res => {
+                    $scope.post = res.data.data;
+
+                    // Ensure rich text editor is updated
+                    // $timeout(() => {
+                    //     const editor = document.querySelector('rich-text-editor .ql-editor');
+                    //     if (editor) editor.innerHTML = $scope.post.content;
+                    // }, 0);
+
+                    $scope.post.contentTrusted = $sce.trustAsHtml($scope.post.content);
+
+                    // Convert published status to boolean
+                    $scope.post.is_published = !!$scope.post.is_published;
+
+                    // Category should already match the select ng-model
+                    $scope.selectedCategory = $scope.post.category_id;
+
+                    // -------------------------
+                    // Load comments for this post
+                    // -------------------------
+                    if (!$scope.post.comments) $scope.post.comments = [];
+                    PostService.getComments($scope.post.id)
+                        .then(res => {
+                            $scope.post.comments = res.data.data;
+                        })
+                        .catch(err => console.error('Failed to load comments:', err));
+                })
+                .catch(err => console.error('Failed to load post:', err));
+                    
             } else {
                 $scope.loadPosts();
                 window.onscroll = () => {

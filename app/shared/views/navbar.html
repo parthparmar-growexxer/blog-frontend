@@ -9,7 +9,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link" href="#!/posts/myposts">My Blogs</a></li>
-        <!-- <li class="nav-item"><a class="nav-link" href="#/categories">Categories</a></li> -->
+        <li class="nav-item" ng-if="userRole() != 'author'"><a class="nav-link" href="#/categories">Categories</a></li>
       </ul>
 
       <ul class="navbar-nav ms-auto">
@@ -22,8 +22,6 @@
             {{ getInitials() }}
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li><a class="dropdown-item" href="#/profile">Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#" ng-click="logout()">Logout</a></li>
           </ul>
         </li>

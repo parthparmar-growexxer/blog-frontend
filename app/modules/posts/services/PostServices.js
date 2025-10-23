@@ -23,7 +23,18 @@
                     }).catch(err => $q.reject(err));
                 },
                 postTogglePublish: id => $http.patch(BASE_URL + '/user/posts/' + id + '/toggle-publish').catch(err => $q.reject(err)),
-                deletePost: id => $http.delete(BASE_URL + '/user/posts/' + id).catch(err => $q.reject(err))
+                deletePost: id => $http.delete(BASE_URL + '/user/posts/' + id).catch(err => $q.reject(err)),
+                getComments: postId => $http.get(BASE_URL + '/posts/' + postId + '/comments').catch(err => $q.reject(err)),
+                addComment: (postId, content) => {
+                    const formData = new FormData();
+                    formData.append('content', content);
+                    return $http.post(BASE_URL + '/posts/' + postId + '/comments', formData, {
+                        transformRequest: angular.identity,
+                        headers: { 'Content-Type': undefined }
+                    }).catch(err => $q.reject(err));
+                },
+                deleteComment: commentId => $http.delete(BASE_URL + '/comments/' + commentId).catch(err => $q.reject(err))
+
             };
         }]);
 })();

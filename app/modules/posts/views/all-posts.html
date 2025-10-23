@@ -27,7 +27,7 @@
     <!-- Blogs list -->
     <div class="row" ng-if="displayedBlogs.length > 0">
         <div class="col-md-4 mb-4" ng-repeat="blog in displayedBlogs">
-            <div class="card h-100 clickable-card" ng-click="openBlog(blog)">
+            <div class="card h-100 clickable-card" ng-click="openBlog(blog.id)">
                 <img class="card-img-top" 
                      ng-src="{{ blog.banner ? BASE_STORAGE_URL + blog.banner : 'assets/images/default.png' }}" 
                      alt="{{ blog.title }}">

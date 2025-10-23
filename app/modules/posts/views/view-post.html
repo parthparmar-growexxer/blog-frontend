@@ -1,0 +1,55 @@
+<div class="row">
+    <!-- Post Banner -->
+    <div class="col-12 mb-4">
+        <img class="img-fluid w-100 rounded" 
+             ng-src="{{ post.banner ? BASE_STORAGE_URL + post.banner : 'assets/images/default.png' }}" 
+             alt="{{ post.title }}">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <!-- Post Title -->
+        <h2 class="mb-3">{{ post.title }}</h2>
+
+        <!-- Author & Published Details -->
+        <div class="mb-3 text-muted">
+            <small>
+                By: {{ post.user.name }} | 
+                Category: {{ post.category.name }} | 
+                Published: {{ post.created_at | date:'medium' }}
+            </small>
+        </div>
+
+        <!-- Post Content -->
+        <div class="mb-4" ng-bind-html="post.contentTrusted"></div>
+
+        <!-- Comment Section (only if user is logged in) -->
+        <div ng-if="isLoggedIn()" class="my-4">
+            <h4>Leave a Comment</h4>
+            <form ng-submit="submitComment(post.id)">
+                <div class="mb-3">
+                    <textarea class="form-control" rows="4" ng-model="comment.content" placeholder="Write your comment..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Comment</button>
+            </form>
+
+            <!-- Display Comments -->
+            <div class="mt-4" ng-if="post.comments && post.comments.length">
+                <h5>Comments</h5>
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="c in post.comments">
+                        <strong>{{ c.user.name }}:</strong> {{ c.content }}
+                        <br>
+                        <small class="text-muted">{{ c.created_at | date:'medium' }}</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Message if user not logged in -->
+        <div ng-if="!isLoggedIn()" class="alert alert-info my-4">
+            Please <a href="#!/login">login</a> to comment on this post.
+        </div>
+    </div>
+</div>

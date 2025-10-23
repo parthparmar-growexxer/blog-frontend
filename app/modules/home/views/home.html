@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-12 row">
+        <h2 class="mb-4 col-6">All Blogs</h2>
+        <div class=" col-6 write-blog-btn">
+            <button class="btn btn-success float-end" ng-if="isLoggedIn()" ng-click="writeBlog()">Write a Blog</button>
+        </div>
+    </div>
+</div>
+
+<!-- Optional category filter -->
+<div class="row my-4">
+    <div class="col-12">
+        <div class="filter-block float-end">
+            <h4>Filter by Category</h4>
+            <select class="form-select w-auto" ng-model="selectedCategory" ng-change="filterByCategory(selectedCategory)">
+                <option value="">All Categories</option>
+                <option ng-repeat="category in categories" value="{{ category.id }}">
+                    {{ category.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-if="blogs.length > 0">
+    <div class="col-md-4 mb-4" ng-repeat="blog in blogs">
+        <div class="card h-100 clickable-card" ng-click="openBlog(blog)">
+            <!-- Blog Banner -->
+            <img class="card-img-top" 
+                 ng-src="{{ blog.banner ? BASE_STORAGE_URL + blog.banner : 'assets/images/default.png' }}" 
+                 alt="{{ blog.title }}">
+
+            <div class="card-body">
+                <h5 class="card-title">{{ blog.title }}</h5>
+                <p class="card-text"  ng-bind-html="(blog.contentTrusted)"></p>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <small class="text-muted">Category: {{ blog.category.name }}</small>
+                <small class="text-muted">By: {{ blog.user.name }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-if="blogs.length === 0">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            No posts available.
+        </div>
+    </div>
+</div>
+
+<div class="row my-4">
+    <div class="col-12 text-center">
+        <button class="btn btn-primary" ng-click="viewAllBlogs()">View All Blogs</button>
+    </div>
+</div>
+
+<!-- Optional CSS to make card clickable and hover effect -->
+<style>
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .clickable-card:hover {
+        transform: scale(1.02);
+    }
+</style>

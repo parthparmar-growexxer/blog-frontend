@@ -1,0 +1,60 @@
+<div class="row">
+    <div class="col-12">
+        <h2>Create New Post</h2>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <form name="newPostForm" ng-submit="createPost()" novalidate enctype="multipart/form-data">
+            <!-- Title -->
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" id="title" class="form-control" ng-model="post.title" required>
+            </div>
+
+            <!-- Content -->
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <rich-text-editor content="post.content"></rich-text-editor>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" class="form-select" ng-model="post.category_id" ng-options="c.id as c.name for c in categories" required>
+                    <option value="">Select Category</option>
+                </select>
+            </div>
+
+            <!-- Banner Image -->
+            <div class="mb-3">
+                <label for="banner" class="form-label">Banner Image</label>
+                <input type="file" id="banner" class="form-control" file-model="post.banner">
+                <div class="mt-2" ng-if="post.banner">
+                    <strong>Selected file:</strong> {{ post.banner.name }}
+                </div>
+            </div>
+
+            <!-- Is Published -->
+            <div class="form-check mb-4">
+                <input type="checkbox" id="is_published" class="form-check-input" ng-model="post.is_published">
+                <label for="is_published" class="form-check-label">Publish immediately</label>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="btn btn-primary" ng-disabled="newPostForm.$invalid">Create Post</button>
+            <a href="#!/posts" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<!-- Optional styling -->
+<style>
+    rich-text-editor .editor {
+        min-height: 200px;
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        padding: .5rem;
+    }
+</style>

@@ -1,0 +1,116 @@
+
+<div class="post-container" ng-if="isLoggedIn()">
+    <div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">My Blogs</h2>
+    </div>
+    </div>
+
+    <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+        <a href="#!/posts/new" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Post
+        </a>
+        </div>
+        <div style="width: 200px;">
+        <input class="form-control form-control-sm" type="text" placeholder="Search posts..." ng-model="q" />
+        </div>
+    </div>
+    </div>
+
+    <!-- If no posts -->
+    <div class="row" ng-if="!posts || posts.length === 0">
+    <div class="col-12">
+        <div class="alert alert-info text-center mb-4">
+        You have no posts yet. <a href="#!/posts/new">Create your first post</a>.
+        </div>
+    </div>
+    </div>
+
+    <!-- Posts table -->
+    <div class="row" ng-if="posts && posts.length">
+    <div class="col-12">
+        <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th style="width: 50%;">Title</th>
+                <th style="width: 15%;">Category</th>
+                <th style="width: 15%;">Published On</th>
+                <th style="width: 10%;">Status</th>
+                <th style="width: 10%;" class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="post in posts | filter:q">
+                <td>
+                <div class="fw-bold">{{ post.title }}</div>
+                <div class="text-muted small" ng-if="post.excerpt">{{ post.excerpt }}</div>
+                </td>
+
+                <td>
+                <span ng-if="post.category">{{ post.category.name }}</span>
+                <span ng-if="!post.category" class="text-muted">—</span>
+                </td>
+
+                <td>
+                <small class="text-muted">{{ post.created_at | date:'medium' }}</small>
+                </td>
+
+                <td>
+                <span class="badge"
+                        ng-class="post.is_published ? 'bg-success' : 'bg-secondary'">
+                    {{ post.is_published ? 'Published' : 'Unpublished' }}
+                </span>
+                </td>
+
+                <td class="text-end">
+                <!-- Edit -->
+                <a href="#!/posts/edit/{{post.id}}"  class="btn btn-sm btn-outline-secondary me-1 my-1 " title="Edit"
+                >
+                    <i class="bi bi-pencil"></i>
+                </a>
+
+                <!-- Publish / Unpublish -->
+                <button type="button"
+                        class="btn btn-sm me-1 my-1 "
+                        ng-class="post.is_published ? 'btn-outline-warning' : 'btn-outline-success'"
+                        ng-click="togglePublish(post)"
+                        title="{{ post.is_published ? 'Unpublish' : 'Publish' }}">
+                    <i class="bi" ng-class="post.is_published ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+
+                <!-- View (public) -->
+                <a href="#!/posts/{{post.id}}" type="button" class="btn btn-sm btn-outline-primary me-1 my-1 " title="View"
+                        >
+                    <i class="bi bi-eye"></i>
+                </a>
+
+                <!-- Delete -->
+                <button type="button" class="btn btn-sm btn-outline-danger my-1 " title="Delete"
+                        ng-click="deletePost(post.id)">
+                    <i class="bi bi-trash"></i>
+                </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+</div>
+<div class="login-container" ng-if="!isLoggedIn()">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning text-center mb-4">
+                Please <a href="#!/posts/myposts" ng-click="login()">login</a> to view your posts.
+            </div>
+        </div>
+    </div>
+</div>
+<!-- small helper styles (optional) -->
+<style>
+  .table .btn-sm { padding: .25rem .5rem; font-size: .85rem; }
+  .table .small { font-size: .85rem; }
+</style>

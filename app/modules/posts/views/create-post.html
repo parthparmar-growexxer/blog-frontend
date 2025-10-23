@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-12">
-        <h2>Create New Post</h2>
+        <h2>{{ isEdit ? 'Edit Blog' :'Create New Blog'}}</h2>
     </div>
 </div>
 
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Buttons -->
-            <button type="submit" class="btn btn-primary" ng-disabled="newPostForm.$invalid">Create Post</button>
+            <button type="submit" class="btn btn-primary" ng-disabled="newPostForm.$invalid">{{ isEdit ? 'Update Blog' : 'Create Blog' }}</button>
             <a href="#!/posts" class="btn btn-secondary ms-2">Cancel</a>
         </form>
     </div>

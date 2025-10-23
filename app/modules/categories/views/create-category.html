@@ -1,0 +1,78 @@
+<div class="category-form-container" ng-if="isLoggedIn()">
+  <div class="row">
+    <div class="col-12 col-md-8 mx-auto">
+      <h2 class="mb-4">{{ isEdit ? 'Edit Category' : 'Create New Category' }}</h2>
+
+      <form name="categoryForm" ng-submit="saveCategory()" novalidate>
+        <!-- Name -->
+        <div class="mb-3">
+          <label for="name" class="form-label">Category Name <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-control"
+            ng-model="category.name"
+            ng-change="generateSlug()"
+            required
+            placeholder="Enter category name"
+          />
+          <div class="text-danger small mt-1" ng-show="categoryForm.name.$touched && categoryForm.name.$invalid">
+            Category name is required.
+          </div>
+        </div>
+
+        <!-- Slug -->
+        <div class="mb-3">
+          <label for="slug" class="form-label">Slug <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="slug"
+            name="slug"
+            class="form-control"
+            ng-model="category.slug"
+            required
+            placeholder="Enter unique slug (auto-generated)"
+          />
+          <div class="text-muted small mt-1">
+            Slugs are used in URLs (e.g., <code>/categories/{{ category.slug || 'your-slug' }}</code>).
+          </div>
+          <div class="text-danger small mt-1" ng-show="categoryForm.slug.$touched && categoryForm.slug.$invalid">
+            Slug is required.
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="#!/categories" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Categories
+          </a>
+          <button type="submit" class="btn btn-primary" ng-disabled="categoryForm.$invalid || isSubmitting">
+            <i class="bi bi-save"></i> {{ isEdit ? 'Update Category' : 'Create Category' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Not logged in -->
+<div class="login-container" ng-if="!isLoggedIn()">
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-warning text-center mb-4">
+        Please <a href="#!/login" ng-click="login()">login</a> to create or edit categories.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Helper styles -->
+<style>
+  .category-form-container {
+    max-width: 700px;
+  }
+  input.ng-invalid.ng-touched {
+    border-color: #dc3545;
+  }
+</style>

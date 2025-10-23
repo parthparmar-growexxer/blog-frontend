@@ -1,0 +1,90 @@
+<div class="category-container" ng-if="isLoggedIn()">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Categories</h2>
+    </div>
+  </div>
+
+  <!-- Top bar: New + Search -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <div>
+        <a href="#!/categories/new" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> New Category
+        </a>
+      </div>
+      <div style="width: 200px;">
+        <input class="form-control form-control-sm" type="text" placeholder="Search categories..." ng-model="q" />
+      </div>
+    </div>
+  </div>
+
+  <!-- If no categories -->
+  <div class="row" ng-if="!categories || categories.length === 0">
+    <div class="col-12">
+      <div class="alert alert-info text-center mb-4">
+        No categories found. <a href="#!/categories/new">Create your first category</a>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories table -->
+  <div class="row" ng-if="categories && categories.length">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 40%;">Name</th>
+              <th style="width: 40%;">Slug</th>
+              <th style="width: 20%;" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="category in categories | filter:q">
+              <td>
+                <div class="fw-bold">{{ category.name }}</div>
+              </td>
+              <td>
+                <span class="text-muted">{{ category.slug }}</span>
+              </td>
+              <td class="text-end">
+                <!-- Edit -->
+                <a href="#!/categories/edit/{{category.id}}" class="btn btn-sm btn-outline-secondary me-1 my-1" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+
+                <!-- Delete -->
+                <button type="button" class="btn btn-sm btn-outline-danger my-1" title="Delete" ng-click="deleteCategory(category.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Not logged in -->
+<div class="login-container" ng-if="!isLoggedIn()">
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-warning text-center mb-4">
+        Please <a href="#!/login" ng-click="login()">login</a> to manage categories.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Helper styles -->
+<style>
+  .table .btn-sm {
+    padding: .25rem .5rem;
+    font-size: .85rem;
+  }
+  .table .small {
+    font-size: .85rem;
+  }
+</style>

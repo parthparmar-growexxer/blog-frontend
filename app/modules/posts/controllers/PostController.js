@@ -11,6 +11,7 @@
             $scope.nextIndex = 0;
             $scope.categories = [];
             $scope.post = {};
+            $scope.isEdit = !!$routeParams.id;
             $scope.selectedCategory = '';
             $scope.BASE_STORAGE_URL = 'http://laravel.local/storage/';
 

@@ -14,7 +14,7 @@
         <div class="col-12">
             <div class="filter-block float-end">
                 <h4>Filter by Category</h4>
-                <select class="form-select w-auto" ng-model="selectedCategory" ng-change="filterByCategory(selectedCategory)">
+                <select class="form-select w-auto" ng-model="selectedCategory" ng-change="filterPostsByCategory(selectedCategory)">
                     <option value="">All Categories</option>
                     <option ng-repeat="category in categories" value="{{ category.id }}">
                         {{ category.name }}

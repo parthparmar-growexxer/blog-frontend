@@ -45,7 +45,6 @@
                     if (!file) return;
                     $scope.$apply(function() {
                         $scope.bannerFile = file;
-                        console.log('File selected:', file);
                     });
                 };
 
@@ -63,8 +62,6 @@
                 // Initialize Schema Form with Categories
                 // -------------------------
                 function initializeSchemaForm(categories) {
-                    console.log('Initializing schema form with categories:', categories);
-                    
                     // Build titleMap
                     var titleMap = [];
                     var enumValues = [];
@@ -77,9 +74,6 @@
                         enumValues.push(categories[i].id);
                     }
                     
-                    console.log('TitleMap:', titleMap);
-                    console.log('Enum values:', enumValues);
-
                     // Define schema
                     $scope.postSchema = {
                         type: 'object',
@@ -141,19 +135,14 @@
                         }
                     ];
 
-                    console.log('Schema form initialized');
-                    console.log('Schema:', $scope.postSchema);
-                    console.log('Form:', $scope.postForm);
                 }
 
                 // -------------------------
                 // Load Categories
                 // -------------------------
                 function loadCategories(callback) {
-                    console.log('Loading categories...');
                     ApiService.getCategories()
                         .then(function(res) {
-                            console.log('Categories API response:', res.data);
                             $scope.categories = res.data.data;
                             
                             // Initialize schema form with categories
@@ -166,6 +155,20 @@
                         .catch(function(err) {
                             console.error('Error loading categories:', err);
                         });
+                }
+
+                // -------------------------
+                // Filter Posts by Category
+                // -------------------------
+                $scope.filterPostsByCategory = function (categoryId) {
+                    if (!categoryId) {
+                        $scope.displayedBlogs = $scope.posts.slice(0, $scope.nextIndex);
+                        return;
+                    }
+                    var filtered = $scope.posts.filter(function(post) {
+                        return post.category && post.category.id === parseInt(categoryId);
+                    });
+                    $scope.displayedBlogs = filtered.slice(0, $scope.nextIndex);
                 }
 
                 // -------------------------
@@ -237,9 +240,6 @@
                 $scope.onSubmit = function(form) {
                     $scope.$broadcast('schemaFormValidate');
                     
-                    console.log('Form:', form);
-                    console.log('Post data:', $scope.post);
-                    
                     if (form.$invalid) {
                         alert('Please fill all required fields correctly');
                         return;
@@ -261,7 +261,6 @@
 
                     action
                         .then(function(res) {
-                            console.log('Save response:', res);
                             alert($routeParams.id ? 'Post updated successfully!' : 'Post created successfully!');
                             $location.path('/posts');
                         })
@@ -334,7 +333,6 @@
                                         $scope.post.category_id = parseInt($scope.post.category.id);
                                     }
                                     $scope.post.is_published = !!$scope.post.is_published;
-                                    console.log('Loaded post for edit:', $scope.post);
                                 })
                                 .catch(function(err) {
                                     console.error('Failed to load post:', err);

@@ -203,7 +203,7 @@
                 };
 
                 $scope.openBlog = function(post) {
-                    $location.path('/posts/' + post.id);
+                    $location.path('/posts/' + post);
                 };
 
                 $scope.deletePost = function(postId) {

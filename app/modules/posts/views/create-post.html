@@ -1,60 +1,61 @@
 <div class="row">
     <div class="col-12">
-        <h2>{{ isEdit ? 'Edit Blog' :'Create New Blog'}}</h2>
+        <h2>{{ isEdit ? 'Edit Blog' : 'Create New Blog' }}</h2>
     </div>
 </div>
 
 <div class="row mt-4">
     <div class="col-md-8 offset-md-2">
-        <form name="newPostForm" ng-submit="createPost()" novalidate enctype="multipart/form-data">
-            <!-- Title -->
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" id="title" class="form-control" ng-model="post.title" required>
-            </div>
+        
+        <!-- Show loading message while schema initializes -->
+        <div ng-if="!postSchema" class="alert alert-info">
+            <i class="bi bi-hourglass-split"></i> Loading form...
+        </div>
 
-            <!-- Content -->
-            <div class="mb-3">
-                <label for="content" class="form-label">Content</label>
-                <rich-text-editor content="post.content"></rich-text-editor>
-            </div>
-
-            <!-- Category -->
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select id="category" class="form-select" ng-model="post.category_id" ng-options="c.id as c.name for c in categories" required>
-                    <option value="">Select Category</option>
-                </select>
-            </div>
-
-            <!-- Banner Image -->
-            <div class="mb-3">
-                <label for="banner" class="form-label">Banner Image</label>
-                <input type="file" id="banner" class="form-control" file-model="post.banner">
-                <div class="mt-2" ng-if="post.banner">
-                    <strong>Selected file:</strong> {{ post.banner.name }}
+        <!-- Schema Form (only renders when postSchema is ready) -->
+        <div ng-if="postSchema">
+            <form name="newPostForm" ng-submit="onSubmit(newPostForm)" novalidate>
+                
+                
+                <!-- Manual File Upload -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Banner Image</label>
+                    <input type="file" 
+                           class="form-control" 
+                           accept="image/*"
+                           id="bannerInput"
+                           onchange="angular.element(this).scope().onFileSelect(this.files[0])">
+                    <small class="form-text text-muted">Upload a banner image for your post (optional)</small>
                 </div>
-            </div>
+                
+                <!-- Schema Form Fields -->
+                <div sf-schema="postSchema" 
+                     sf-form="postForm" 
+                     sf-model="post"></div>
+                     
+                <!-- Show existing banner in edit mode -->
+                <div ng-if="isEdit && post.banner" class="mb-3">
+                    <label class="form-label">Current Banner:</label><br>
+                    <img ng-src="{{ BASE_STORAGE_URL + post.banner }}" 
+                         alt="Current banner" 
+                         class="img-thumbnail"
+                         style="max-width: 300px; max-height: 200px;">
+                </div>
 
-            <!-- Is Published -->
-            <div class="form-check mb-4">
-                <input type="checkbox" id="is_published" class="form-check-input" ng-model="post.is_published">
-                <label for="is_published" class="form-check-label">Publish immediately</label>
-            </div>
-
-            <!-- Buttons -->
-            <button type="submit" class="btn btn-primary" ng-disabled="newPostForm.$invalid">{{ isEdit ? 'Update Blog' : 'Create Blog' }}</button>
-            <a href="#!/posts" class="btn btn-secondary ms-2">Cancel</a>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Optional styling -->
 <style>
-    rich-text-editor .editor {
-        min-height: 200px;
-        border: 1px solid #ced4da;
-        border-radius: .375rem;
-        padding: .5rem;
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .img-thumbnail {
+        padding: .25rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
     }
 </style>

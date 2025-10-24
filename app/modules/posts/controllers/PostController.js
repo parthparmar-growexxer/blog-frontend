@@ -2,259 +2,383 @@
     'use strict';
 
     angular.module('postsModule')
-        .controller('PostController', ['$scope', '$timeout', 'ApiService', 'AuthService', 'PostService', '$location', '$routeParams', '$sce', 
-        function($scope, $timeout, ApiService, AuthService, PostService, $location, $routeParams, $sce) {
+        .controller('PostController', [
+            '$scope', '$timeout', 'ApiService', 'AuthService', 'PostService', '$location', '$routeParams', '$sce',
+            function($scope, $timeout, ApiService, AuthService, PostService, $location, $routeParams, $sce) {
 
-            $scope.posts = [];
-            $scope.displayedBlogs = [];
-            $scope.blogsPerPage = 6;
-            $scope.nextIndex = 0;
-            $scope.categories = [];
-            $scope.post = {};
-            $scope.isEdit = !!$routeParams.id;
-            $scope.selectedCategory = '';
-            $scope.BASE_STORAGE_URL = 'http://laravel.local/storage/';
+                $scope.posts = [];
+                $scope.displayedBlogs = [];
+                $scope.blogsPerPage = 6;
+                $scope.nextIndex = 0;
+                $scope.categories = [];
+                $scope.post = {
+                    is_published: false
+                };
+                $scope.isEdit = !!$routeParams.id;
+                $scope.selectedCategory = '';
+                $scope.BASE_STORAGE_URL = 'http://laravel.local/storage/';
+                $scope.bannerFile = null;
 
-            // -------------------------
-            // Authentication & Navigation
-            // -------------------------
-            $scope.isLoggedIn = () => AuthService.isLoggedIn();
-            $scope.login = () => new bootstrap.Modal(document.getElementById('loginModal')).show();
-            $scope.writeBlog = () => $location.path('/posts/new');
+                // Initialize schema and form as null first
+                $scope.postSchema = null;
+                $scope.postForm = null;
 
-            // -------------------------
-            // Utilities
-            // -------------------------
-            function truncateHtml(html, length) {
-                const div = document.createElement('div');
-                div.innerHTML = html;
-                let text = div.textContent || div.innerText || '';
-                return text.length > length ? $sce.trustAsHtml(text.substr(0, length) + '...') : $sce.trustAsHtml(text);
-            }
+                // -------------------------
+                // Auth & Navigation
+                // -------------------------
+                $scope.isLoggedIn = function() { 
+                    return AuthService.isLoggedIn();
+                };
+                
+                $scope.login = function() { 
+                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                };
+                
+                $scope.writeBlog = function() { 
+                    $location.path('/posts/new');
+                };
 
-            $scope.togglePublish = function(post) {
-                post.is_published = !post.is_published;
-                PostService.postTogglePublish(post.id)
-                    .then(() => {
-                        alert('Post ' + (post.is_published ? 'published' : 'unpublished') + ' successfully!');
-                    })
-                    .catch(err => {
-                        console.error('Error updating publish status:', err);
-                        post.is_published = !post.is_published; // revert on error
+                // -------------------------
+                // File Upload Handler
+                // -------------------------
+                $scope.onFileSelect = function(file) {
+                    if (!file) return;
+                    $scope.$apply(function() {
+                        $scope.bannerFile = file;
+                        console.log('File selected:', file);
                     });
-            };
-            
-            // -------------------------
-            // Load categories
-            // -------------------------
-            ApiService.getCategories().then(res => $scope.categories = res.data.data.slice(0, 4));
+                };
 
-            // -------------------------
-            // Load posts
-            // -------------------------
-            $scope.loadPosts = function() {
-                PostService.getPosts()
-                    .then(res => {
-                        $scope.posts = res.data.data.map(blog => {
-                            blog.contentTrusted = truncateHtml(blog.content, 150);
-                            return blog;
-                        });
-                        $scope.displayedBlogs = [];
-                        $scope.nextIndex = 0;
-                        $scope.loadMoreBlogs();
-                    })
-                    .catch(err => console.error('Failed to load posts:', err));
-            };
-
-            $scope.openBlog = function(postId) {
-                $location.path('/posts/' + postId);
-            };
-            
-            $scope.deletePost = function(postId) {
-                if (confirm('Are you sure you want to delete this post?')) {
-                    PostService.deletePost(postId)
-                        .then(() => {
-                            alert('Post deleted successfully!');
-                            $scope.posts = $scope.posts.filter(p => p.id !== postId);
-                            $scope.displayedBlogs = $scope.displayedBlogs.filter(p => p.id !== postId);
-                        })
-                        .catch(err => console.error('Error deleting post:', err));
+                // -------------------------
+                // Utility: truncate content
+                // -------------------------
+                function truncateHtml(html, length) {
+                    var div = document.createElement('div');
+                    div.innerHTML = html;
+                    var text = div.textContent || div.innerText || '';
+                    return text.length > length ? $sce.trustAsHtml(text.substr(0, length) + '...') : $sce.trustAsHtml(text);
                 }
-            };
-            
-            $scope.loadMoreBlogs = function() {
-                if ($scope.nextIndex >= $scope.posts.length) return;
-                const nextSet = $scope.posts.slice($scope.nextIndex, $scope.nextIndex + $scope.blogsPerPage);
-                $scope.displayedBlogs = $scope.displayedBlogs.concat(nextSet);
-                $scope.nextIndex += $scope.blogsPerPage;
-            };
 
+                // -------------------------
+                // Initialize Schema Form with Categories
+                // -------------------------
+                function initializeSchemaForm(categories) {
+                    console.log('Initializing schema form with categories:', categories);
+                    
+                    // Build titleMap
+                    var titleMap = [];
+                    var enumValues = [];
+                    
+                    for (var i = 0; i < categories.length; i++) {
+                        titleMap.push({
+                            value: categories[i].id,
+                            name: categories[i].name
+                        });
+                        enumValues.push(categories[i].id);
+                    }
+                    
+                    console.log('TitleMap:', titleMap);
+                    console.log('Enum values:', enumValues);
 
-            $scope.createPost = function() {
-                const editor = document.querySelector('rich-text-editor .ql-editor');
-                $scope.post.content = editor ? editor.innerHTML : '';
+                    // Define schema
+                    $scope.postSchema = {
+                        type: 'object',
+                        properties: {
+                            title: { 
+                                type: 'string', 
+                                title: 'Title', 
+                                minLength: 3,
+                                maxLength: 255
+                            },
+                            content: { 
+                                type: 'string', 
+                                title: 'Content',
+                                minLength: 10
+                            },
+                            category_id: {
+                                type: 'integer',
+                                title: 'Category',
+                                enum: enumValues
+                            },
+                            is_published: { 
+                                type: 'boolean', 
+                                title: 'Publish immediately',
+                                default: false
+                            }
+                        },
+                        required: ['title', 'content', 'category_id']
+                    };
 
-                const formData = new FormData();
-                formData.append('title', $scope.post.title);
-                formData.append('content', $scope.post.content);
-                formData.append('category_id', $scope.post.category_id);
-                formData.append('is_published', $scope.post.is_published ? 1 : 0);
+                    // Define form
+                    $scope.postForm = [
+                        {
+                            key: 'title',
+                            type: 'text',
+                            placeholder: 'Enter post title',
+                            feedback: false
+                        },
+                        {
+                            key: 'content',
+                            type: 'textarea',
+                            placeholder: 'Write your blog content here...',
+                            feedback: false
+                        },
+                        {
+                            key: 'category_id',
+                            type: 'select',
+                            titleMap: titleMap,
+                            feedback: false
+                        },
+                        {
+                            key: 'is_published',
+                            type: 'checkbox',
+                            feedback: false
+                        },
+                        {
+                            type: 'submit',
+                            style: 'btn-primary',
+                            title: $scope.isEdit ? 'Update Blog' : 'Create Blog'
+                        }
+                    ];
 
-                if ($scope.post.banner) formData.append('banner', $scope.post.banner);
+                    console.log('Schema form initialized');
+                    console.log('Schema:', $scope.postSchema);
+                    console.log('Form:', $scope.postForm);
+                }
 
-                const action = $routeParams.id ? PostService.updatePost($routeParams.id, formData) : PostService.createPost(formData);
+                // -------------------------
+                // Load Categories
+                // -------------------------
+                function loadCategories(callback) {
+                    console.log('Loading categories...');
+                    ApiService.getCategories()
+                        .then(function(res) {
+                            console.log('Categories API response:', res.data);
+                            $scope.categories = res.data.data;
+                            
+                            // Initialize schema form with categories
+                            initializeSchemaForm($scope.categories);
+                            
+                            if (callback) {
+                                $timeout(callback, 100);
+                            }
+                        })
+                        .catch(function(err) {
+                            console.error('Error loading categories:', err);
+                        });
+                }
 
-                action.then(() => {
-                    alert($routeParams.id ? 'Post updated successfully!' : 'Post created successfully!');
-                    $location.path('/posts');
-                }).catch(err => console.error('Error saving post:', err));
-            };
+                // -------------------------
+                // Publish toggle
+                // -------------------------
+                $scope.togglePublish = function(post) {
+                    post.is_published = !post.is_published;
+                    PostService.postTogglePublish(post.id)
+                        .then(function() {
+                            alert('Post ' + (post.is_published ? 'published' : 'unpublished') + ' successfully!');
+                        })
+                        .catch(function(err) {
+                            console.error('Error updating publish status:', err);
+                            post.is_published = !post.is_published;
+                        });
+                };
 
-            // -------------------------
-            // Filter posts by category
-            // -------------------------
-            $scope.filterByCategory = function(categoryId) {
-                if (!categoryId) {
-                    $scope.loadPosts();
-                } else {
-                    PostService.getPostsByCategory(categoryId)
-                        .then(res => {
-                            $scope.posts = res.data.data.map(blog => {
+                // -------------------------
+                // Load all posts
+                // -------------------------
+                $scope.loadPosts = function() {
+                    PostService.getPosts()
+                        .then(function(res) {
+                            $scope.posts = res.data.data.map(function(blog) {
                                 blog.contentTrusted = truncateHtml(blog.content, 150);
                                 return blog;
                             });
-
-                            // Reset lazy loading
                             $scope.displayedBlogs = [];
                             $scope.nextIndex = 0;
                             $scope.loadMoreBlogs();
                         })
-                        .catch(err => console.error('Failed to filter posts:', err));
-                }
-            };
-
-            // -------------------------
-            // Comments
-            // -------------------------
-            $scope.comments = [];
-            $scope.newComment = '';
-
-            // Load comments for a post
-            $scope.loadComments = function(postId) {
-                if (!postId) return;
-
-                PostService.getComments(postId)
-                    .then(res => $scope.comments = res.data.data)
-                    .catch(err => console.error('Failed to load comments:', err));
-            };
-
-            $scope.addComment = function(postId) {
-
-                $scope.newComment = document.getElementById('newComment').value;
-
-                if (!postId || !$scope.newComment.trim()) return;
-
-                PostService.addComment(postId, $scope.newComment)
-                    .then(res => {
-                        $scope.comments.push(res.data.data);
-                        $scope.post.comments = $scope.comments; // update post.comments for ng-repeat
-                        $scope.newComment = '';
-                    })
-                    .catch(err => console.error('Failed to add comment:', err));
-            };
-
-            // Delete a comment
-            $scope.deleteComment = function(commentId, index) {
-                if (!commentId) return;
-
-                PostService.deleteComment(commentId)
-                    .then(() => $scope.comments.splice(index, 1))
-                    .catch(err => console.error('Failed to delete comment:', err));
-            };
-
-            // Automatically load comments if viewing a post
-            if ($routeParams.id) {
-                $scope.loadComments($routeParams.id);
-            }
-
-            // -------------------------
-            // Initialization
-            // -------------------------
-            if ($location.path() === '/posts/new') {
-                $scope.post = {};
-            } else if ($location.path().startsWith('/posts/edit/')) {
-                if ($routeParams.id) {
-                    PostService.getPostById($routeParams.id)
-                        .then(res => {
-                            $scope.post = res.data.data;
-
-                            // Ensure rich text editor is updated
-                            $timeout(() => {
-                                const editor = document.querySelector('rich-text-editor .ql-editor');
-                                if (editor) editor.innerHTML = $scope.post.content;
-                            }, 0);
-
-                            // Convert published status to boolean
-                            $scope.post.is_published = !!$scope.post.is_published;
-
-                            // Category should already match the select ng-model
-                            $scope.selectedCategory = $scope.post.category_id;
-                        })
-                        .catch(err => console.error('Failed to load post:', err));
-                }
-            } 
-            else if( $location.path() === '/posts/myposts') {
-                PostService.getMyPosts()
-                    .then(res => {
-                        $scope.posts = res.data.data.map(blog => {
-                            blog.contentTrusted = truncateHtml(blog.content, 150);
-                            return blog;
+                        .catch(function(err) {
+                            console.error('Failed to load posts:', err);
                         });
-                        $scope.displayedBlogs = [];
-                        $scope.nextIndex = 0;
-                        $scope.loadMoreBlogs();
-                    })
-                    .catch(err => console.error('Failed to load my posts:', err));
-            }   
-            else if ($routeParams.id) {
-                PostService.getPostById($routeParams.id)
-                .then(res => {
-                    $scope.post = res.data.data;
+                };
 
-                    // Ensure rich text editor is updated
-                    // $timeout(() => {
-                    //     const editor = document.querySelector('rich-text-editor .ql-editor');
-                    //     if (editor) editor.innerHTML = $scope.post.content;
-                    // }, 0);
+                $scope.openBlog = function(post) {
+                    $location.path('/posts/' + post.id);
+                };
 
-                    $scope.post.contentTrusted = $sce.trustAsHtml($scope.post.content);
-
-                    // Convert published status to boolean
-                    $scope.post.is_published = !!$scope.post.is_published;
-
-                    // Category should already match the select ng-model
-                    $scope.selectedCategory = $scope.post.category_id;
-
-                    // -------------------------
-                    // Load comments for this post
-                    // -------------------------
-                    if (!$scope.post.comments) $scope.post.comments = [];
-                    PostService.getComments($scope.post.id)
-                        .then(res => {
-                            $scope.post.comments = res.data.data;
-                        })
-                        .catch(err => console.error('Failed to load comments:', err));
-                })
-                .catch(err => console.error('Failed to load post:', err));
-                    
-            } else {
-                $scope.loadPosts();
-                window.onscroll = () => {
-                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
-                        $scope.$apply($scope.loadMoreBlogs);
+                $scope.deletePost = function(postId) {
+                    if (confirm('Are you sure you want to delete this post?')) {
+                        PostService.deletePost(postId)
+                            .then(function() {
+                                alert('Post deleted successfully!');
+                                $scope.posts = $scope.posts.filter(function(p) { 
+                                    return p.id !== postId; 
+                                });
+                                $scope.displayedBlogs = $scope.displayedBlogs.filter(function(p) { 
+                                    return p.id !== postId; 
+                                });
+                            })
+                            .catch(function(err) {
+                                console.error('Error deleting post:', err);
+                            });
                     }
                 };
-            }
 
-        }]);
+                $scope.loadMoreBlogs = function() {
+                    if ($scope.nextIndex >= $scope.posts.length) return;
+                    var nextSet = $scope.posts.slice($scope.nextIndex, $scope.nextIndex + $scope.blogsPerPage);
+                    $scope.displayedBlogs = $scope.displayedBlogs.concat(nextSet);
+                    $scope.nextIndex += $scope.blogsPerPage;
+                };
+
+                // -------------------------
+                // Create or Update Post
+                // -------------------------
+                $scope.onSubmit = function(form) {
+                    $scope.$broadcast('schemaFormValidate');
+                    
+                    console.log('Form:', form);
+                    console.log('Post data:', $scope.post);
+                    
+                    if (form.$invalid) {
+                        alert('Please fill all required fields correctly');
+                        return;
+                    }
+
+                    var formData = new FormData();
+                    formData.append('title', $scope.post.title);
+                    formData.append('content', $scope.post.content);
+                    formData.append('category_id', $scope.post.category_id);
+                    formData.append('is_published', $scope.post.is_published ? 1 : 0);
+                    
+                    if ($scope.bannerFile) {
+                        formData.append('banner', $scope.bannerFile);
+                    }
+
+                    var action = $routeParams.id
+                        ? PostService.updatePost($routeParams.id, formData)
+                        : PostService.createPost(formData);
+
+                    action
+                        .then(function(res) {
+                            console.log('Save response:', res);
+                            alert($routeParams.id ? 'Post updated successfully!' : 'Post created successfully!');
+                            $location.path('/posts');
+                        })
+                        .catch(function(err) {
+                            console.error('Error saving post:', err);
+                            var errorMsg = 'Failed to save post';
+                            if (err.data && err.data.message) {
+                                errorMsg = err.data.message;
+                            }
+                            alert('Error: ' + errorMsg);
+                        });
+                };
+
+                // -------------------------
+                // Comments
+                // -------------------------
+                $scope.comments = [];
+                $scope.newComment = '';
+
+                $scope.loadComments = function(postId) {
+                    if (!postId) return;
+                    PostService.getComments(postId)
+                        .then(function(res) {
+                            $scope.comments = res.data.data;
+                        })
+                        .catch(function(err) {
+                            console.error('Failed to load comments:', err);
+                        });
+                };
+
+                $scope.addComment = function(postId) {
+                    if (!postId || !$scope.newComment.trim()) return;
+                    PostService.addComment(postId, $scope.newComment)
+                        .then(function(res) {
+                            $scope.comments.push(res.data.data);
+                            $scope.newComment = '';
+                        })
+                        .catch(function(err) {
+                            console.error('Failed to add comment:', err);
+                        });
+                };
+
+                $scope.deleteComment = function(commentId, index) {
+                    if (!commentId) return;
+                    PostService.deleteComment(commentId)
+                        .then(function() {
+                            $scope.comments.splice(index, 1);
+                        })
+                        .catch(function(err) {
+                            console.error('Failed to delete comment:', err);
+                        });
+                };
+
+                // -------------------------
+                // Initialization
+                // -------------------------
+                if ($location.path() === '/posts/new') {
+                    $scope.post = {
+                        is_published: false
+                    };
+                    loadCategories();
+                } else if ($location.path().indexOf('/posts/edit/') === 0) {
+                    if ($routeParams.id) {
+                        loadCategories(function() {
+                            PostService.getPostById($routeParams.id)
+                                .then(function(res) {
+                                    $scope.post = res.data.data;
+                                    // Convert category object to category_id
+                                    if ($scope.post.category) {
+                                        $scope.post.category_id = parseInt($scope.post.category.id);
+                                    }
+                                    $scope.post.is_published = !!$scope.post.is_published;
+                                    console.log('Loaded post for edit:', $scope.post);
+                                })
+                                .catch(function(err) {
+                                    console.error('Failed to load post:', err);
+                                });
+                        });
+                    }
+                } else if ($location.path() === '/posts/myposts') {
+                    PostService.getMyPosts()
+                        .then(function(res) {
+                            $scope.posts = res.data.data.map(function(blog) {
+                                blog.contentTrusted = truncateHtml(blog.content, 150);
+                                return blog;
+                            });
+                            $scope.displayedBlogs = [];
+                            $scope.nextIndex = 0;
+                            $scope.loadMoreBlogs();
+                        })
+                        .catch(function(err) {
+                            console.error('Failed to load my posts:', err);
+                        });
+                } else if ($routeParams.id) {
+                    PostService.getPostById($routeParams.id)
+                        .then(function(res) {
+                            $scope.post = res.data.data;
+                            $scope.post.contentTrusted = $sce.trustAsHtml($scope.post.content);
+                            $scope.post.is_published = !!$scope.post.is_published;
+                            $scope.loadComments($scope.post.id);
+                        })
+                        .catch(function(err) {
+                            console.error('Failed to load post:', err);
+                        });
+                } else {
+                    $scope.loadPosts();
+                    loadCategories();
+                    
+                    window.onscroll = function() {
+                        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                            $scope.$apply(function() {
+                                $scope.loadMoreBlogs();
+                            });
+                        }
+                    };
+                }
+
+            }
+        ]);
 })();

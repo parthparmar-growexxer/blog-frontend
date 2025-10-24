@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AngularJS Blog App</title>
-
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Optional Global CSS -->
     <link rel="stylesheet" href="css/style.css">
-
     <!-- Favicon (optional) -->
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -19,52 +16,56 @@
 <body>
     <!-- Navbar -->
     <navbar></navbar>
-
     <!-- Main View -->
     <div class="container mt-4" ng-view></div>
-
-    <!-- AngularJS Core -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
-
-    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    
+    <!-- AngularJS Core (1.4.7 - Last version confirmed working with schema-form) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-sanitize.min.js"></script>
+    
+    <!-- SchemaForm Dependencies - Load in exact order -->
+    <script src="https://cdn.jsdelivr.net/npm/tv4@1.3.0/tv4.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/objectpath@1.2.1/lib/ObjectPath.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/angular-schema-form@0.8.13/dist/schema-form.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/angular-schema-form-bootstrap@0.2.0/bootstrap-decorator.min.js"></script>
     
     <!-- Main App -->
     <script src="app/app.js"></script>
     <script src="app/config/app.routes.js"></script>
     <script src="app/shared/interceptors/api.interceptor.js"></script>
-
-    <!-- Modules -->
+    
+    <!-- App Modules -->
     <script src="app/modules/auth/auth.module.js"></script>
     <script src="app/modules/posts/posts.module.js"></script>
     <script src="app/modules/categories/categories.module.js"></script>
     <script src="app/modules/users/users.module.js"></script>
     <script src="app/modules/home/home.module.js"></script>
-
-
-    <!-- Module Services -->
+    
+    <!-- Services -->
     <script src="app/shared/services/ApiService.js"></script>
     <script src="app/modules/auth/services/AuthService.js"></script>
     <script src="app/modules/posts/services/PostServices.js"></script>
     <script src="app/modules/categories/services/CategoryService.js"></script>
-
-    <!-- Module Controllers -->
+    
+    <!-- Controllers -->
     <script src="app/modules/home/controllers/home.controller.js"></script>
     <script src="app/modules/posts/controllers/PostController.js"></script>
     <script src="app/modules/categories/controllers/CategoryController.js"></script>
-
+    
     <!-- Module Routes -->
     <script src="app/modules/auth/auth.routes.js"></script>
     <script src="app/modules/posts/posts.routes.js"></script>
     <script src="app/modules/categories/categories.routes.js"></script>
     <script src="app/modules/home/home.routes.js"></script>
     
-
     <!-- Shared Directives -->
     <script src="app/shared/directives/navbarDirective.js"></script>
     <script src="app/shared/directives/fileUploadDirective.js"></script>
     <script src="app/shared/directives/richTextEditorDirective.js"></script>
+    
+    <!-- Bootstrap JS Bundle & Quill (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 </body>
 </html>

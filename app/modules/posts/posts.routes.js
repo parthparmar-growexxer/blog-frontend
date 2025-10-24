@@ -24,9 +24,6 @@
                 .when('/posts/:id', {
                     templateUrl: 'app/modules/posts/views/view-post.html',
                     controller: 'PostController'
-                })
-                .otherwise({
-                    redirectTo: '/posts'
                 });
         }]);
 })();

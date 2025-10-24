@@ -32,15 +32,15 @@ angular.module('homeModule')
     });
 
     $scope.viewBlog = function(blogId) {
-        window.location.href = '#!/posts/' + blogId;
+        window.location.href = '#/posts/' + blogId;
     };
     
     $scope.writeBlog = function() {
-        window.location.href = '#!/posts/new';
+        window.location.href = '#/posts/new';
     }
 
     $scope.viewAllBlogs = function() {
-        window.location.href = '#!/posts';
+        window.location.href = '#/posts';
     };
 
     // Filter blogs by category
@@ -63,6 +63,6 @@ angular.module('homeModule')
     };
 
     $scope.openBlog = function(blog) {
-        window.location.href = '#!/posts/' + blog.id;
+        window.location.href = '#/posts/' + blog.id;
     };
 }]);

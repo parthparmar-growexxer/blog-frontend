@@ -16,9 +16,6 @@
                 .when('/categories/edit/:id', {
                     templateUrl: 'app/modules/categories/views/create-category.html',
                     controller: 'CategoryController'
-                })
-                .otherwise({
-                    redirectTo: '/categories'
                 });
         }]);
 })();

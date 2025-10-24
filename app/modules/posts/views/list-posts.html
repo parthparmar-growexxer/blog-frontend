@@ -9,7 +9,7 @@
     <div class="row mb-3">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
-        <a href="#!/posts/new" class="btn btn-primary">
+        <a href="#/posts/new" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> New Blog Post
         </a>
         </div>
@@ -23,7 +23,7 @@
     <div class="row" ng-if="!posts || posts.length === 0">
     <div class="col-12">
         <div class="alert alert-info text-center mb-4">
-        You have no posts yet. <a href="#!/posts/new">Create your first post</a>.
+        You have no posts yet. <a href="#/posts/new">Create your first post</a>.
         </div>
     </div>
     </div>
@@ -67,7 +67,7 @@
 
                 <td class="text-end">
                 <!-- Edit -->
-                <a href="#!/posts/edit/{{post.id}}"  class="btn btn-sm btn-outline-secondary me-1 my-1 " title="Edit"
+                <a href="#/posts/edit/{{post.id}}"  class="btn btn-sm btn-outline-secondary me-1 my-1 " title="Edit"
                 >
                     <i class="bi bi-pencil"></i>
                 </a>
@@ -82,7 +82,7 @@
                 </button>
 
                 <!-- View (public) -->
-                <a href="#!/posts/{{post.id}}" type="button" class="btn btn-sm btn-outline-primary me-1 my-1 " title="View"
+                <a href="#/posts/{{post.id}}" type="button" class="btn btn-sm btn-outline-primary me-1 my-1 " title="View"
                         >
                     <i class="bi bi-eye"></i>
                 </a>
@@ -104,7 +104,7 @@
     <div class="row">
         <div class="col-12">
             <div class="alert alert-warning text-center mb-4">
-                Please <a href="#!/posts/myposts" ng-click="login()">login</a> to view your posts.
+                Please <a href="#/posts/myposts" ng-click="login()">login</a> to view your posts.
             </div>
         </div>
     </div>

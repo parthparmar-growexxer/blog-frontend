@@ -292,11 +292,14 @@
                 };
 
                 $scope.addComment = function(postId) {
+                    $scope.newComment = document.getElementById('newComment').value;
                     if (!postId || !$scope.newComment.trim()) return;
                     PostService.addComment(postId, $scope.newComment)
                         .then(function(res) {
                             $scope.comments.push(res.data.data);
                             $scope.newComment = '';
+                            document.getElementById('newComment').value = '';
+                            $scope.loadComments(postId);
                         })
                         .catch(function(err) {
                             console.error('Failed to add comment:', err);

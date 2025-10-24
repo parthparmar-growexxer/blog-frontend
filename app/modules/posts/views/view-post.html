@@ -41,10 +41,10 @@
         </div>
         
         <!-- Display Comments -->
-        <div class="mt-4" ng-if="post.comments && post.comments.length">
+        <div class="my-4" ng-if="comments && comments.length">
             <h5>Comments</h5>
             <ul class="list-group">
-                <li class="list-group-item" ng-repeat="c in post.comments">
+                <li class="list-group-item" ng-repeat="c in comments">
                     <strong>{{ c.user.name }}:</strong> {{ c.body }}
                     <br>
                     <small class="text-muted">{{ c.created_at | date:'medium' }}</small>
